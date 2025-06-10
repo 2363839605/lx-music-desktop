@@ -1,43 +1,47 @@
 <template>
   <div :class="$style.container">
-    <div :class="$style.songListHeader">
-      <div :class="$style.songListHeaderLeft" :style="{ backgroundImage: 'url('+(picUrl || listDetailInfo.info.img)+')' }">
-        <!-- <span v-if="listDetailInfo.info.play_count" :class="$style.playNum">{{ listDetailInfo.info.play_count }}</span> -->
+
+      <div :class="$style.songListHeader">
+        <div :class="$style.songListHeaderLeft" :style="{ backgroundImage: 'url('+(picUrl || listDetailInfo.info.img)+')' }">
+          <!-- <span v-if="listDetailInfo.info.play_count" :class="$style.playNum">{{ listDetailInfo.info.play_count }}</span> -->
+        </div>
+        <div :class="$style.songListHeaderMiddle">
+          <h3 :title="listDetailInfo.info.name">{{ listDetailInfo.info.name }}</h3>
+          <p :title="listDetailInfo.info.desc">{{ listDetailInfo.info.desc }}</p>
+        </div>
+        <div :class="$style.songListHeaderRight">
+          <base-btn
+            :class="$style.headerRightBtn"
+            :disabled="!!listDetailInfo.noItemLabel"
+            @click="playSongListDetail(listDetailInfo.id, listDetailInfo.source, listDetailInfo.list)"
+          >
+            {{ $t('list__play') }}
+          </base-btn>
+          <base-btn
+            :class="$style.headerRightBtn"
+            :disabled="!!listDetailInfo.noItemLabel"
+            @click="addSongListDetail(listDetailInfo.id, listDetailInfo.source, listDetailInfo.info.name)"
+          >
+            {{ $t('list__collect') }}
+          </base-btn>
+          <base-btn :class="$style.headerRightBtn" @click="handleBack">{{ $t('back') }}</base-btn>
+        </div>
       </div>
-      <div :class="$style.songListHeaderMiddle">
-        <h3 :title="listDetailInfo.info.name">{{ listDetailInfo.info.name }}</h3>
-        <p :title="listDetailInfo.info.desc">{{ listDetailInfo.info.desc }}</p>
-      </div>
-      <div :class="$style.songListHeaderRight">
-        <base-btn
-          :class="$style.headerRightBtn"
-          :disabled="!!listDetailInfo.noItemLabel"
-          @click="playSongListDetail(listDetailInfo.id, listDetailInfo.source, listDetailInfo.list)"
-        >
-          {{ $t('list__play') }}
-        </base-btn>
-        <base-btn
-          :class="$style.headerRightBtn"
-          :disabled="!!listDetailInfo.noItemLabel"
-          @click="addSongListDetail(listDetailInfo.id, listDetailInfo.source, listDetailInfo.info.name)"
-        >
-          {{ $t('list__collect') }}
-        </base-btn>
-        <base-btn :class="$style.headerRightBtn" @click="handleBack">{{ $t('back') }}</base-btn>
-      </div>
+    <div v-if="qrcode">
+      <img :src="qrcode" alt="">
     </div>
-    <div :class="$style.list">
-      <material-online-list
-        ref="listRef"
-        :page="listDetailInfo.page"
-        :limit="listDetailInfo.limit"
-        :total="listDetailInfo.total"
-        :list="listDetailInfo.list"
-        :no-item="listDetailInfo.noItemLabel"
-        @play-list="handlePlayList"
-        @toggle-page="togglePage"
-      />
-    </div>
+      <div v-else :class="$style.list">
+        <material-online-list
+          ref="listRef"
+          :page="listDetailInfo.page"
+          :limit="listDetailInfo.limit"
+          :total="listDetailInfo.total"
+          :list="listDetailInfo.list"
+          :no-item="listDetailInfo.noItemLabel"
+          @play-list="handlePlayList"
+          @toggle-page="togglePage"
+        />
+      </div>
   </div>
 </template>
 
@@ -49,7 +53,6 @@ import { useRouter } from '@common/utils/vueRouter'
 import { addSongListDetail, playSongListDetail } from './action'
 import useList from './useList'
 import useKeyBack from './useKeyBack'
-
 
 const source = ref<LX.OnlineSource>('kw')
 const id = ref<string>('')
@@ -108,8 +111,8 @@ export default {
   beforeRouteUpdate: verifyQueryParams,
   setup() {
     const router = useRouter()
-
     const {
+      qrcode,
       listRef,
       listDetailInfo,
       getListData,
@@ -146,6 +149,7 @@ export default {
       id,
       page,
       picUrl,
+      qrcode,
       listDetailInfo,
       listRef,
       togglePage,

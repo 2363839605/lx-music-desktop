@@ -45,6 +45,7 @@ export const setList = (result: ListInfo, tagId: string, sortId: string, page: n
 }
 export const setListDetail = (result: ListDetailInfo, id: string, page: number) => {
   listDetailInfo.list = markRaw([...result.list])
+  console.log(listDetailInfo.list)
   listDetailInfo.id = id
   listDetailInfo.source = result.source
   if (page == 1 || (result.total && result.list.length)) listDetailInfo.total = result.total
@@ -55,7 +56,18 @@ export const setListDetail = (result: ListDetailInfo, id: string, page: number) 
   if (result.list.length) listDetailInfo.noItemLabel = ''
   else if (page == 1) listDetailInfo.noItemLabel = window.i18n.t('no_item')
 }
-
+export const setDailyListDetail = (result: any, id: string, page: number) => {
+  listDetailInfo.list = markRaw([...result.list])
+  listDetailInfo.id = id
+  listDetailInfo.source = result.source
+  if (page == 1 || (result.total && result.list.length)) listDetailInfo.total = result.total
+  else listDetailInfo.total = result.limit * page
+  listDetailInfo.limit = result.limit
+  listDetailInfo.page = page
+  listDetailInfo.info = markRaw({ ...result.info })
+  if (result.list.length) listDetailInfo.noItemLabel = ''
+  else if (page == 1) listDetailInfo.noItemLabel = window.i18n.t('no_item')
+}
 export const setSelectListInfo = (info: ListInfoItem) => {
   selectListInfo.author = info.author
   selectListInfo.desc = info.desc
@@ -112,6 +124,20 @@ export const getAndSetList = async(source: LX.OnlineSource, tabId: string, sortI
   return musicSdk[source]?.songList.getList(sortId, tabId, page).then((result: ListInfo) => {
     cache.set(key, result)
     if (key != listInfo.key) return
+    console.log(result)
+    if (result.source == 'wy'){
+      result.list[0] = {
+        author: '亓',
+        desc: '亓的每日推荐音乐',
+        id: '-1',
+        img: 'https://p2.music.126.net/6sAXHDiGgyAPbEMTIemVlw==/109951168110863128.jpg',
+        name: '亓的每日推荐音乐',
+        play_count: '666666',
+        source: 'wy',
+        time: new Date().getFullYear().toString() + '-' + (new Date().getMonth() + 1).toString() + '-' + (new Date().getDate() ).toString(),
+        total: '30',
+      }
+    }
     setList(result, tabId, sortId, page)
   }).catch((error: any) => {
     clearList()

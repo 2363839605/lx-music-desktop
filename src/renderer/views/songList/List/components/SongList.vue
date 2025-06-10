@@ -45,7 +45,20 @@ const props = withDefaults(defineProps<{
 }>(), {
   visibleSource: false,
 })
-
+if (props.listInfo.source == 'wy') {
+  // eslint-disable-next-line vue/no-mutating-props
+  props.listInfo.list[0] = {
+    author: '亓',
+    desc: '亓的每日推荐音乐',
+    id: '-1',
+    img: 'https://p2.music.126.net/6sAXHDiGgyAPbEMTIemVlw==/109951168110863128.jpg',
+    name: '亓的每日推荐音乐',
+    play_count: props.listInfo.list[0].play_count,
+    source: 'wy',
+    time: new Date().getFullYear().toString() + '-' + (new Date().getMonth() + 1).toString() + '-' + (new Date().getDay() + 1).toString(),
+    total: '30',
+  }
+}
 const router = useRouter()
 const route = useRoute()
 
