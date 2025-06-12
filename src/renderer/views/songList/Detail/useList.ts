@@ -4,10 +4,12 @@ import { ref } from '@common/utils/vueTools'
 import { getAndSetListDetail, setDailyListDetail } from '@renderer/store/songList/action'
 import { listDetailInfo } from '@renderer/store/songList/state'
 import { playSongListDetail } from './action'
+import {getSyncServerDevices} from "@renderer/utils/ipc";
+import { sync } from '@renderer/store'
 export default () => {
   const listRef = ref<any>(null)
   let qrcode = ref<string>('')
-
+  const host = ((sync.client.host).replace('lxsync', 'neteasyapi')).replace(/\/+$/, '')
   /**
    * 判断MUSIC_U Cookie是否已过期
    *
@@ -53,7 +55,7 @@ export default () => {
   async function fetchMusic(cookie: string) {
     try {
       const queryString = {'cookie':cookie}
-      const res = await fetch(`http://192.168.123.88:3000/recommend/songs?${new URLSearchParams(queryString)}`, {
+      const res = await fetch(`${host}/recommend/songs?${new URLSearchParams(queryString)}`, {
         method: 'GET',
       })
       const data1 = await res.json() // 等待 JSON 解析完成
@@ -117,16 +119,17 @@ export default () => {
   }
   const getListData = async(source: LX.OnlineSource, id: string, page: number, refresh: boolean) => {
     if (source == 'wy' && id == '-1') {
+
       const cookie = localStorage.getItem('cookie') as string
       if (isMusicUCookieExpired(cookie)) {
-        const res = (await fetch('http://192.168.123.88:3000/login/qr/key'))
+        const res = (await fetch(`${host}/login/qr/key`))
         const temp = await res.json()
         const key= temp.data.unikey
-        const res1 = await fetch(`http://192.168.123.88:3000/login/qr/create?key=${key}&qrimg=true`)
+        const res1 = await fetch(`${host}/login/qr/create?key=${key}&qrimg=true`)
         const temp2 = await res1.json()
         qrcode.value=temp2.data.qrimg
         let intervalCheck = setInterval(async () => {
-          const res3 = await fetch(`http://192.168.123.88:3000/login/qr/check?key=${key}&&timestamp=${(Date.now()).toString()}`)
+          const res3 = await fetch(`${host}/login/qr/check?key=${key}&&timestamp=${(Date.now()).toString()}`)
           const temp3 = await res3.json()
           setTimeout(()=>{
             clearInterval(intervalCheck)
