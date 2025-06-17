@@ -1,11 +1,12 @@
 // import { useCommit } from '@common/utils/vueTools'
 import { defaultList } from '@renderer/store/list/state'
-import { getListMusics, addListMusics } from '@renderer/store/list/action'
+import {getListMusics, addListMusics, removeListMusics, getUserLists} from '@renderer/store/list/action'
 import { addTempPlayList } from '@renderer/store/player/action'
 import { appSetting } from '@renderer/store/setting'
 import { type Ref } from '@common/utils/vueTools'
 import { playList } from '@renderer/core/player'
 import { LIST_IDS } from '@common/constants'
+import {listDetailInfo} from "@renderer/store/songList/state";
 
 export default ({ selectedList, props, removeAllSelect, emit }: {
   selectedList: Ref<LX.Music.MusicInfoOnline[]>
@@ -21,16 +22,34 @@ export default ({ selectedList, props, removeAllSelect, emit }: {
   const handlePlayMusic = async(index: number, single: boolean) => {
     let targetSong = props.list[index]
     const defaultListMusics = await getListMusics(defaultList.id)
-    if (selectedList.value.length && !single) {
-      await addListMusics(defaultList.id, [...selectedList.value])
-      removeAllSelect()
-    } else {
-      await addListMusics(defaultList.id, [targetSong])
-    }
+    if (listDetailInfo.id=='-1'&&listDetailInfo.source=='wy'){
+      selectedList.value=props.list
+
+      let ids=[]
+      const list = await getListMusics(defaultList.id)
+      if (list.length >= 200){
+        for(let i = list.length-1; i > 200; i--) {
+          ids.push(list[i].id)
+        }
+        await removeListMusics({ listId: defaultList.id, ids: ids})
+      }
+      // await removeListMusics()
+      await addListMusics(defaultList.id,[...selectedList.value] )
+
+    }else{
+      if (selectedList.value.length && !single) {
+        await addListMusics(defaultList.id, [...selectedList.value])
+        removeAllSelect()
+      } else {
+        await addListMusics(defaultList.id, [targetSong])
+      }
+
+      }
     let targetIndex = defaultListMusics.findIndex(s => s.id === targetSong.id)
     if (targetIndex > -1) {
       playList(defaultList.id, targetIndex)
     }
+
   }
 
   const handlePlayMusicLater = (index: number, single: boolean) => {
@@ -43,6 +62,7 @@ export default ({ selectedList, props, removeAllSelect, emit }: {
   }
 
   const doubleClickPlay = (index: number) => {
+    console.log( appSetting['list.isClickPlayList'])
     if (
       window.performance.now() - clickTime > 400 ||
       clickIndex !== index
