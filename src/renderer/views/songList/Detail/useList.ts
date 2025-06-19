@@ -120,7 +120,7 @@ export default () => {
   }
   const getListData = async(source: LX.OnlineSource, id: string, page: number, refresh: boolean) => {
     if (source == 'wy' && id == '-1') {
-
+      listDetailInfo.noItemLabel = window.i18n.t('list__loading')
       const cookie = localStorage.getItem('cookie') as string
       if (isMusicUCookieExpired(cookie)) {
         const res = (await fetch(`${host}/api/netease/login/qr/key`))
