@@ -9,7 +9,8 @@ import { sync } from '@renderer/store'
 export default () => {
   const listRef = ref<any>(null)
   let qrcode = ref<string>('')
-  const host = ((sync.client.host).replace('lxsync', 'neteasyapi')).replace(/\/+$/, '')
+  const host = (sync.client.host).replace(/\/+$/, '')
+  console.log(host)
   /**
    * 判断MUSIC_U Cookie是否已过期
    *
@@ -55,7 +56,7 @@ export default () => {
   async function fetchMusic(cookie: string) {
     try {
       const queryString = {'cookie':cookie}
-      const res = await fetch(`${host}/recommend/songs?${new URLSearchParams(queryString)}`, {
+      const res = await fetch(`${host}/api/netease/recommend/songs?${new URLSearchParams(queryString)}`, {
         method: 'GET',
       })
       const data1 = await res.json() // 等待 JSON 解析完成
@@ -122,14 +123,14 @@ export default () => {
 
       const cookie = localStorage.getItem('cookie') as string
       if (isMusicUCookieExpired(cookie)) {
-        const res = (await fetch(`${host}/login/qr/key`))
+        const res = (await fetch(`${host}/api/netease/login/qr/key`))
         const temp = await res.json()
         const key= temp.data.unikey
-        const res1 = await fetch(`${host}/login/qr/create?key=${key}&qrimg=true`)
+        const res1 = await fetch(`${host}/api/netease/login/qr/create?key=${key}&qrimg=true`)
         const temp2 = await res1.json()
         qrcode.value=temp2.data.qrimg
         let intervalCheck = setInterval(async () => {
-          const res3 = await fetch(`${host}/login/qr/check?key=${key}&&timestamp=${(Date.now()).toString()}`)
+          const res3 = await fetch(`${host}/api/netease/login/qr/check?key=${key}&&timestamp=${(Date.now()).toString()}`)
           const temp3 = await res3.json()
           setTimeout(()=>{
             clearInterval(intervalCheck)
