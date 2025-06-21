@@ -7,6 +7,7 @@ import { type Ref } from '@common/utils/vueTools'
 import { playList } from '@renderer/core/player'
 import { LIST_IDS } from '@common/constants'
 import {listDetailInfo} from "@renderer/store/songList/state";
+import {useRouter} from "vue-router";
 
 export default ({ selectedList, props, removeAllSelect, emit }: {
   selectedList: Ref<LX.Music.MusicInfoOnline[]>
@@ -19,10 +20,11 @@ export default ({ selectedList, props, removeAllSelect, emit }: {
   let clickTime = 0
   let clickIndex = -1
 
+  const router = useRouter()
   const handlePlayMusic = async(index: number, single: boolean) => {
     let targetSong = props.list[index]
     const defaultListMusics = await getListMusics(defaultList.id)
-    if (listDetailInfo.id=='-1'&&listDetailInfo.source=='wy'){
+    if (router.currentRoute.value.fullPath.includes('/songList/detail?source=wy&id=-1')) {
       selectedList.value=props.list
 
       let ids=[]
